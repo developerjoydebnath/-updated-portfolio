@@ -52,9 +52,6 @@ const corsOptions: cors.CorsOptions = {
   maxAge: 86400, // 24 hours - preflight cache duration
 };
 
-app.use('/api/testimonials', testimonialRoutes);
-app.use('/api/content', contentRoutes);
-app.use('/api/projects', projectRoutes);
 
 app.use((err: any, req: any, res: any, next: any) => {
   if (err instanceof multer.MulterError) {
@@ -76,6 +73,10 @@ app.use(cors(corsOptions));
 app.use(cookieParser());
 app.use(bodyParser.json({ limit: '10mb' }));
 app.use(bodyParser.urlencoded({ limit: '10mb', extended: true }));
+
+app.use('/api/testimonials', testimonialRoutes);
+app.use('/api/content', contentRoutes);
+app.use('/api/projects', projectRoutes);
 
 // Health check endpoint
 app.get('/health', (req, res) => {
