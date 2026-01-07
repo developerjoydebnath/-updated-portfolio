@@ -20,27 +20,17 @@ cloudinary.config({
 });
 
 const storage = new CloudinaryStorage({
-  cloudinary,
+  cloudinary: cloudinary,
   params: async (req, file) => {
     const isPdf = file.mimetype === 'application/pdf';
 
-    if (isPdf) {
-      return {
-        folder: 'portfolio',
-        resource_type: 'raw',
-        public_id: 'Joy_Debnath_CV',
-        format: 'pdf',
-      };
-    }
-
     return {
       folder: 'portfolio',
-      resource_type: 'image',
-      allowed_formats: ['jpg', 'png', 'jpeg', 'webp', 'svg'],
+      resource_type: isPdf ? 'raw' : 'image',
+      allowed_formats: ['jpg', 'png', 'jpeg', 'webp', 'svg', 'pdf'],
     };
   },
 });
-
 
 export const upload = multer({ 
   storage,
