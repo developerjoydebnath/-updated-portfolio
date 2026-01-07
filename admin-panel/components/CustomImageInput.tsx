@@ -12,11 +12,10 @@ const CustomImageInput: React.FC<CustomImageInputProps> = ({ value, onChange, la
   const [preview, setPreview] = useState(value);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  console.log(value);
-
 const resolveImageSrc = (value: string) => {
   if (!value) return '';
   if (value.startsWith('data:image')) return value;
+  if(value.startsWith('http://') || value.startsWith('https://')) return value;
   return import.meta.env.VITE_API_URL + value;
 };
 
