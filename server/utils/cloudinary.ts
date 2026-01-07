@@ -21,10 +21,15 @@ cloudinary.config({
 
 const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
-  params: {
-    folder: 'portfolio',
-    allowed_formats: ['jpg', 'png', 'jpeg', 'webp', 'svg', 'pdf', 'doc', 'docx'],
-  } as any,
+  params: async (req, file) => {
+    const isPdf = file.mimetype === 'application/pdf';
+
+    return {
+      folder: 'portfolio',
+      resource_type: isPdf ? 'raw' : 'image',
+      allowed_formats: ['jpg', 'png', 'jpeg', 'webp', 'svg', 'pdf'],
+    };
+  },
 });
 
 export const upload = multer({ 
