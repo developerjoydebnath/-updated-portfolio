@@ -20,6 +20,16 @@ export const getAnalytics = async () => {
   return response.data;
 };
 
+export const getRecentVisits = async (page = 1, limit = 10) => {
+  const response = await api.get(`/analytics/recent?page=${page}&limit=${limit}`);
+  return response.data;
+};
+
+export const getUniqueVisitors = async (page = 1, limit = 10) => {
+  const response = await api.get(`/analytics/unique?page=${page}&limit=${limit}`);
+  return response.data;
+};
+
 // Content
 export const getContent = async () => {
   const response = await api.get('/content');

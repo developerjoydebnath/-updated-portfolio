@@ -31,8 +31,27 @@ const router = express.Router();
  */
 router.post('/visit', async (req, res) => {
   try {
-    const { path, ip, userAgent } = req.body;
-    const visit = new Analytics({ path, ip, userAgent });
+    const { path, userAgent } = req.body;
+    
+    // Express 'trust proxy' makes req.ip the actual client IP
+    let clientIp = req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+    
+    // Handle comma-separated lists from proxies (take the first one)
+    if (typeof clientIp === 'string' && clientIp.includes(',')) {
+      clientIp = clientIp.split(',')[0].trim();
+    }
+    
+    // Clean up IPv6 loopback and standardizations
+    if (clientIp === '::1' || clientIp === '::ffff:127.0.0.1') {
+      clientIp = '127.0.0.1';
+    }
+
+    const visit = new Analytics({ 
+      path, 
+      ip: clientIp, 
+      userAgent 
+    });
+    
     await visit.save();
     res.status(201).json({ message: 'Visit recorded' });
   } catch (error) {
@@ -59,13 +78,12 @@ router.get('/', async (req, res) => {
     const totalVisits = await Analytics.countDocuments();
     const uniqueVisitors = (await Analytics.distinct('ip')).length;
     
-    // Get visits by path
+    // Get stats from helper if needed, but for dashboard summary we keep basics
     const visitsByPath = await Analytics.aggregate([
       { $group: { _id: '$path', count: { $sum: 1 } } },
       { $sort: { count: -1 } }
     ]);
 
-    // Get visits over time (last 7 days)
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
     
@@ -88,6 +106,85 @@ router.get('/', async (req, res) => {
     });
   } catch (error) {
     console.error('Error fetching analytics:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+/**
+ * @swagger
+ * /api/analytics/recent:
+ *   get:
+ *     summary: Get paginated recent visits
+ *     tags: [Analytics]
+ */
+router.get('/recent', async (req, res) => {
+  try {
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const skip = (page - 1) * limit;
+
+    const visits = await Analytics.find()
+      .sort({ timestamp: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    const total = await Analytics.countDocuments();
+
+    res.json({
+      visits,
+      pagination: {
+        total,
+        page,
+        pages: Math.ceil(total / limit)
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+/**
+ * @swagger
+ * /api/analytics/unique:
+ *   get:
+ *     summary: Get paginated unique visitors
+ *     tags: [Analytics]
+ */
+router.get('/unique', async (req, res) => {
+  try {
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const skip = (page - 1) * limit;
+
+    const uniqueIps = await Analytics.aggregate([
+      {
+        $group: {
+          _id: '$ip',
+          lastVisit: { $max: '$timestamp' },
+          totalVisits: { $sum: 1 },
+          userAgent: { $first: '$userAgent' }
+        }
+      },
+      { $sort: { lastVisit: -1 } },
+      { $skip: skip },
+      { $limit: limit }
+    ]);
+
+    const totalCountResult = await Analytics.aggregate([
+      { $group: { _id: '$ip' } },
+      { $count: 'total' }
+    ]);
+    const total = totalCountResult[0]?.total || 0;
+
+    res.json({
+      visitors: uniqueIps,
+      pagination: {
+        total,
+        page,
+        pages: Math.ceil(total / limit)
+      }
+    });
+  } catch (error) {
     res.status(500).json({ error: 'Internal server error' });
   }
 });

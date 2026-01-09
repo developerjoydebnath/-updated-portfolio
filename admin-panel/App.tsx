@@ -15,6 +15,7 @@ import {
 import Loader from './components/Loader';
 import Sidebar from './components/Sidebar';
 import { INITIAL_DATA } from './constants';
+import AnalyticsManager from './pages/AnalyticsManager';
 import ContentManager from './pages/ContentManager';
 import Dashboard from './pages/Dashboard';
 import ExperienceManager from './pages/ExperienceManager';
@@ -151,38 +152,39 @@ const App: React.FC = () => {
     const channel = pusher.subscribe('portfolio-queries');
     
     channel.bind('new-query', (query: any) => {
-      // Small delay to prevent blocking the WebSocket event loop
-      setTimeout(() => {
-        React.startTransition(() => {
-          setData(prev => ({
-            ...prev,
-            queries: [query, ...prev.queries]
-          }));
-        });
+      // Immediate update for the data list
+      setData(prev => {
+        // Prevent duplicates
+        if (prev.queries.some(q => q._id === query._id)) return prev;
+        
+        return {
+          ...prev,
+          queries: [query, ...prev.queries]
+        };
+      });
 
-        // Play notification sound
-        const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
-        audio.play().catch(e => console.log('Audio play failed:', e));
+      // Play notification sound
+      const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
+      audio.play().catch(e => console.log('Audio play failed:', e));
 
-        // Browser Notification
-        try {
-          if ("Notification" in window && Notification.permission === "granted") {
-            new Notification("New Query Received", {
-              body: `From: ${query.name}\nSubject: ${query.subject}`,
-              icon: "/favicon.ico",
-              tag: "new-query",
-              requireInteraction: true,
-              silent: false
-            });
-          }
-        } catch (nErr) {
-          console.error('Notification creation error:', nErr);
+      // Browser Notification
+      try {
+        if ("Notification" in window && Notification.permission === "granted") {
+          new Notification("New Query Received", {
+            body: `From: ${query.name}\nSubject: ${query.subject}`,
+            icon: "/favicon.ico",
+            tag: "new-query",
+            requireInteraction: true,
+            silent: false
+          });
         }
+      } catch (nErr) {
+        console.error('Notification creation error:', nErr);
+      }
 
-        toast.success('New client query received!', {
-          description: `From: ${query.name} - ${query.subject}`,
-        });
-      }, 0);
+      toast.success('New client query received!', {
+        description: `From: ${query.name} - ${query.subject}`,
+      });
     });
 
     return () => {
@@ -263,6 +265,7 @@ const App: React.FC = () => {
             </div>
             <Routes>
               <Route path="/" element={<Dashboard data={data} />} />
+              <Route path="/analytics" element={<AnalyticsManager />} />
               <Route path="/content" element={<ContentManager data={data} onUpdate={updateData} />} />
               <Route path="/services" element={<ServicesManager data={data} onUpdate={updateData} />} />
               <Route path="/projects" element={<ProjectsManager data={data} onUpdate={updateData} />} />

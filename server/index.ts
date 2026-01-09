@@ -22,6 +22,9 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+// Trust various proxy setups (Vercel, Nginx, etc.) to get real IP
+app.set('trust proxy', true);
+
 // CORS Configuration
 const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',') || [];
 

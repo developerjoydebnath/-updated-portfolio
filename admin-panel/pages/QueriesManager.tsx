@@ -106,9 +106,9 @@ const QueriesManager: React.FC<QueriesManagerProps> = ({ data, onUpdate }) => {
                 {query.status === 'unread' && <div className="absolute top-4 right-4 w-2 h-2 bg-cyan-500 rounded-full shadow-[0_0_10px_rgba(34,211,238,0.5)]"></div>}
                 <div className="flex justify-between items-start mb-1">
                   <h4 className="font-bold text-sm text-white truncate pr-6">{query.name}</h4>
-                  <span className="text-[10px] text-gray-500 flex items-center gap-1">
+                  <span className="text-[10px] text-gray-500 flex items-center gap-1 whitespace-nowrap">
                     <Clock size={10} />
-                    {new Date(query.createdAt).toLocaleDateString()}
+                    {new Date(query.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })} {new Date(query.createdAt).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}
                   </span>
                 </div>
                 <p className="text-xs text-cyan-400 font-medium truncate mb-1">{query.subject}</p>

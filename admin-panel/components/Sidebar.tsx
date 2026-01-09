@@ -1,5 +1,6 @@
 
 import {
+  BarChart3,
   Briefcase,
   Code2,
   FileEdit,
@@ -25,6 +26,7 @@ const Sidebar: React.FC<SidebarProps> = ({ queriesCount, isOpen, onClose }) => {
 
   const menuItems = [
     { path: '/', icon: <LayoutDashboard size={20} />, label: 'Dashboard' },
+    { path: '/analytics', icon: <BarChart3 size={20} />, label: 'Analytics' },
     { path: '/content', icon: <FileEdit size={20} />, label: 'Main Content' },
     { path: '/services', icon: <Layers size={20} />, label: 'Services' },
     { path: '/skills', icon: <Code2 size={20} />, label: 'Technical Skills' },

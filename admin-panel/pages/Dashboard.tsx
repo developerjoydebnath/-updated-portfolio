@@ -2,8 +2,8 @@
 import {
   ArrowUpRight,
   Briefcase,
+  Globe,
   MessageCircle,
-  TrendingUp,
   Users
 } from 'lucide-react';
 import React from 'react';
@@ -27,15 +27,28 @@ const Dashboard: React.FC<DashboardProps> = ({ data }) => {
         console.error('Failed to fetch analytics:', error);
       }
     };
+    
     fetchAnalytics();
+    
+    // Refresh analytics every 60 seconds
+    const interval = setInterval(fetchAnalytics, 60000);
+    return () => clearInterval(interval);
   }, []);
 
   const stats = [
-    { label: 'Total Visits', value: analytics?.totalVisits || 0, icon: <TrendingUp />, color: 'text-green-400', bg: 'bg-green-400/10' },
+    { label: 'Total Visits', value: analytics?.totalVisits || 0, icon: <Globe />, color: 'text-green-400', bg: 'bg-green-400/10' },
     { label: 'Unique Visitors', value: analytics?.uniqueVisitors || 0, icon: <Users />, color: 'text-orange-400', bg: 'bg-orange-400/10' },
     { label: 'Total Projects', value: data.projects.length, icon: <Briefcase />, color: 'text-blue-400', bg: 'bg-blue-400/10' },
     { label: 'Pending Queries', value: data.queries.filter(q => q.status === 'unread').length, icon: <MessageCircle />, color: 'text-cyan-400', bg: 'bg-cyan-400/10' },
   ];
+
+  const getBrowserIcon = (ua: string) => {
+    if (ua.includes('Chrome')) return '🌐';
+    if (ua.includes('Firefox')) return '🦊';
+    if (ua.includes('Safari')) return '🧭';
+    if (ua.includes('Edge')) return '🌊';
+    return '📱';
+  };
 
   return (
     <div className="space-y-8 pb-10">
@@ -64,24 +77,55 @@ const Dashboard: React.FC<DashboardProps> = ({ data }) => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 bg-[#0a0a1a] rounded-2xl border border-gray-800 overflow-hidden">
           <div className="p-6 border-b border-gray-800 flex justify-between items-center">
-            <h2 className="font-bold text-lg">Recent Queries</h2>
+            <div className="flex items-center gap-3">
+              <h2 className="font-bold text-lg">Recent Queries</h2>
+              {data.queries.filter(q => q.status === 'unread').length > 0 && (
+                <span className="bg-cyan-500/10 text-cyan-400 text-[10px] px-2 py-0.5 rounded-full font-bold border border-cyan-500/20">
+                  {data.queries.filter(q => q.status === 'unread').length} NEW
+                </span>
+              )}
+            </div>
             <Link to="/queries">
               <button className="text-xs text-cyan-400 font-bold uppercase tracking-wider">View All</button>
             </Link>
           </div>
           <div className="divide-y divide-gray-800">
             {data.queries.length > 0 ? (
-              data.queries.slice(0, 5).map(query => (
-                <div key={query._id} className="p-6 hover:bg-gray-800/30 transition-colors flex gap-4">
-                  <div className="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center text-gray-400 font-bold">
+              [...data.queries]
+                .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+                .slice(0, 5)
+                .map((query, index) => (
+                <div 
+                  key={query._id} 
+                  className={`p-6 hover:bg-gray-800/30 transition-colors flex gap-4 relative group ${
+                    query.status === 'unread' && index === 0 ? 'animate-in fade-in slide-in-from-left duration-500' : ''
+                  }`}
+                >
+                  {query.status === 'unread' && (
+                    <div className={`absolute left-0 top-0 bottom-0 w-1 bg-cyan-500 shadow-[0_0_10px_rgba(6,182,212,0.5)] ${
+                      index === 0 ? 'animate-pulse' : ''
+                    }`}></div>
+                  )}
+                  <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold transition-colors ${
+                    query.status === 'unread' ? 'bg-cyan-500/20 text-cyan-400' : 'bg-gray-800 text-gray-500'
+                  }`}>
                     {query.name.charAt(0)}
                   </div>
-                  <div className="flex-1">
-                    <div className="flex justify-between items-start">
-                      <h4 className="font-semibold text-white">{query.name}</h4>
-                      <span className="text-xs text-gray-500">
-                        {new Date(query.createdAt).toLocaleDateString()}
-                      </span>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex justify-between items-start gap-2">
+                        <h4 className="font-semibold text-white truncate">{query.name}</h4>
+                        <div className="flex items-center gap-2 flex-shrink-0">
+                          <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider ${
+                            query.status === 'unread' ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20' :
+                            query.status === 'replied' ? 'bg-green-500/10 text-green-400 border border-green-500/20' :
+                            'bg-gray-500/10 text-gray-500 border border-gray-500/10'
+                          }`}>
+                            {query.status}
+                          </span>
+                          <span className="text-[11px] text-gray-500 whitespace-nowrap">
+                            {new Date(query.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })} • {new Date(query.createdAt).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}
+                          </span>
+                        </div>
                     </div>
                     <p className="text-sm text-gray-400 mt-1 line-clamp-1">{query.message}</p>
                   </div>
