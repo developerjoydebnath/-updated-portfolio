@@ -24,6 +24,7 @@ dotenv.config();
 const app = express();
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
+  path: '/socket.io',
   cors: {
     origin: process.env.NODE_ENV === 'development' ? '*' : (process.env.ALLOWED_ORIGINS?.split(',') || []),
     methods: ['GET', 'POST'],
@@ -94,20 +95,10 @@ app.use(cookieParser());
 app.use(bodyParser.json({ limit: '10mb' }));
 app.use(bodyParser.urlencoded({ limit: '10mb', extended: true }));
 
+// Routes
 app.use('/api/testimonials', testimonialRoutes);
 app.use('/api/content', contentRoutes);
 app.use('/api/projects', projectRoutes);
-
-// Health check endpoint
-app.get('/health', (req, res) => {
-  res.status(200).json({ 
-    status: 'healthy', 
-    timestamp: new Date().toISOString(),
-    mongodb: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected'
-  });
-});
-
-// Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/skills', skillRoutes);

@@ -47,15 +47,15 @@ const App: React.FC = () => {
   useEffect(() => {
     const fetchData = async () => {
       if (!isAuthenticated) return;
-      
+
       try {
         const [
-          testimonials, 
-          content, 
-          experience, 
-          projects, 
-          queries, 
-          services, 
+          testimonials,
+          content,
+          experience,
+          projects,
+          queries,
+          services,
           skills
         ] = await Promise.all([
           getTestimonials(),
@@ -85,13 +85,13 @@ const App: React.FC = () => {
         console.error('Failed to fetch data:', error);
         // If fetch fails (e.g. invalid token), maybe logout?
         if ((error as any)?.response?.status === 401) {
-             handleLogout();
+          handleLogout();
         }
       } finally {
         setLoading(false);
       }
     };
-    
+
     fetchData();
   }, [isAuthenticated]);
 
@@ -108,7 +108,7 @@ const App: React.FC = () => {
           window.removeEventListener('keydown', unlockAudio);
           console.log('Audio unlocked');
         })
-        .catch(() => {});
+        .catch(() => { });
     };
 
     window.addEventListener('click', unlockAudio);
@@ -121,6 +121,7 @@ const App: React.FC = () => {
 
     const socket = io(import.meta.env.VITE_API_URL || 'http://localhost:5000', {
       withCredentials: true,
+      transports: ['polling', 'websocket'], // Try polling first for compatibility
     });
 
     socket.on('connect', () => {
@@ -153,8 +154,8 @@ const App: React.FC = () => {
         action: {
           label: 'View',
           onClick: () => {
-             // Maybe navigate to queries page? 
-             // For now just closing is fine or user can click it
+            // Maybe navigate to queries page? 
+            // For now just closing is fine or user can click it
           },
         },
       });
@@ -195,13 +196,13 @@ const App: React.FC = () => {
             <span className="font-bold text-sm tracking-wide">Admin CMS</span>
           </div>
           <div className="flex items-center gap-2">
-            <button 
+            <button
               onClick={handleLogout}
               className="p-2 text-gray-400 hover:text-white transition-colors text-xs font-bold"
             >
               Logout
             </button>
-            <button 
+            <button
               onClick={toggleSidebar}
               className="p-2 text-gray-400 hover:text-white transition-colors"
             >
@@ -212,23 +213,23 @@ const App: React.FC = () => {
 
         {/* Backdrop for mobile */}
         {isSidebarOpen && (
-          <div 
+          <div
             className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 md:hidden"
             onClick={closeSidebar}
           />
         )}
 
         {/* Sidebar Component */}
-        <Sidebar 
-          queriesCount={data.queries.filter(q => q.status === 'unread').length} 
+        <Sidebar
+          queriesCount={data.queries.filter(q => q.status === 'unread').length}
           isOpen={isSidebarOpen}
           onClose={closeSidebar}
         />
-        
+
         <main className="flex-1 overflow-y-auto p-4 pt-20 md:pt-8 md:p-8 lg:p-10 custom-scrollbar">
           <div className="max-w-6xl mx-auto">
             <div className="hidden md:flex justify-end mb-6">
-              <button 
+              <button
                 onClick={handleLogout}
                 className="px-4 py-2 bg-gray-900 border border-gray-800 rounded-xl text-sm font-bold text-gray-400 hover:text-white hover:border-gray-700 transition-all"
               >
