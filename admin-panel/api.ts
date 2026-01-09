@@ -90,6 +90,11 @@ export const deleteQuery = async (id: string) => {
   return response.data;
 };
 
+export const replyQuery = async (id: string, message: string) => {
+  const response = await api.post(`/queries/${id}/reply`, { message });
+  return response.data;
+};
+
 // Services
 export const getServices = async () => {
   const response = await api.get('/services');

@@ -18,10 +18,10 @@ router.get('/', async (req, res) => {
     const count = await Skill.countDocuments();
     if (count === 0) {
       const defaultSkills = [
-        { name: 'React', percentage: 95, category: 'Frontend' },
-        { name: 'TypeScript', percentage: 90, category: 'Frontend' },
-        { name: 'Node.js', percentage: 85, category: 'Backend' },
-        { name: 'PostgreSQL', percentage: 78, category: 'Database' }
+        { name: 'React', category: 'Frontend', icon: 'IconBrandReact' },
+        { name: 'TypeScript', category: 'Frontend', icon: 'IconBrandTypescript' },
+        { name: 'Node.js', category: 'Backend', icon: 'IconBrandNodejs' },
+        { name: 'PostgreSQL', category: 'Database', icon: 'IconBrandMysql' }
       ];
       await Skill.insertMany(defaultSkills);
     }
@@ -44,12 +44,10 @@ router.get('/', async (req, res) => {
  *         application/json:
  *           schema:
  *             type: object
- *             required: [name, level]
+ *             required: [name, category]
  *             properties:
  *               name:
  *                 type: string
- *               level:
- *                 type: number
  *               category:
  *                 type: string
  *               icon:

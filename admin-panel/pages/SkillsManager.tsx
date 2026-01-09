@@ -1,85 +1,85 @@
 import {
-  IconBolt,
-  IconBox,
-  IconBraces,
-  IconBrandAdobe,
-  IconBrandAdobeIllustrator,
-  IconBrandAngular,
-  IconBrandAws,
-  IconBrandAzure,
-  IconBrandBitbucket,
-  IconBrandBootstrap,
-  IconBrandCloudflare,
-  IconBrandCpp,
-  IconBrandCSharp,
-  IconBrandCss3,
-  IconBrandDjango,
-  IconBrandDocker,
-  IconBrandDribbble,
-  IconBrandFacebook,
-  IconBrandFigma,
-  IconBrandFirebase,
-  IconBrandFramer,
-  IconBrandFramerMotion,
-  IconBrandGithub,
-  IconBrandGolang,
-  IconBrandGraphql,
-  IconBrandHtml5,
-  IconBrandInstagram,
-  IconBrandJavascript,
-  IconBrandLaravel,
-  IconBrandLinkedin,
-  IconBrandMongodb,
-  IconBrandMysql,
-  IconBrandNextjs,
-  IconBrandNodejs,
-  IconBrandNpm,
-  IconBrandOpenai,
-  IconBrandPhp,
-  IconBrandPnpm,
-  IconBrandPrisma,
-  IconBrandPython,
-  IconBrandReact,
-  IconBrandRedux,
-  IconBrandSass,
-  IconBrandStorybook,
-  IconBrandSupabase,
-  IconBrandSymfony,
-  IconBrandTailwind,
-  IconBrandTwitter,
-  IconBrandTypescript,
-  IconBrandVercel,
-  IconBrandVite,
-  IconBrandVscode,
-  IconBrandVue,
-  IconBrandYarn,
-  IconBrandYoutube,
-  IconCloud,
-  IconCode,
-  IconCpu,
-  IconDatabase,
-  IconDeviceDesktop,
-  IconDeviceFloppy,
-  IconDeviceMobile,
-  IconEdit,
-  IconExternalLink,
-  IconFileCode,
-  IconHash,
-  IconHexagon,
-  IconLayersIntersect,
-  IconLetterC,
-  IconPackage,
-  IconPalette,
-  IconPlus,
-  IconRefresh,
-  IconSearch,
-  IconServer,
-  IconShieldCheck,
-  IconTerminal2,
-  IconTrash,
-  IconWind,
-  IconWorld,
-  IconX
+    IconBolt,
+    IconBox,
+    IconBraces,
+    IconBrandAdobe,
+    IconBrandAdobeIllustrator,
+    IconBrandAngular,
+    IconBrandAws,
+    IconBrandAzure,
+    IconBrandBitbucket,
+    IconBrandBootstrap,
+    IconBrandCloudflare,
+    IconBrandCpp,
+    IconBrandCSharp,
+    IconBrandCss3,
+    IconBrandDjango,
+    IconBrandDocker,
+    IconBrandDribbble,
+    IconBrandFacebook,
+    IconBrandFigma,
+    IconBrandFirebase,
+    IconBrandFramer,
+    IconBrandFramerMotion,
+    IconBrandGithub,
+    IconBrandGolang,
+    IconBrandGraphql,
+    IconBrandHtml5,
+    IconBrandInstagram,
+    IconBrandJavascript,
+    IconBrandLaravel,
+    IconBrandLinkedin,
+    IconBrandMongodb,
+    IconBrandMysql,
+    IconBrandNextjs,
+    IconBrandNodejs,
+    IconBrandNpm,
+    IconBrandOpenai,
+    IconBrandPhp,
+    IconBrandPnpm,
+    IconBrandPrisma,
+    IconBrandPython,
+    IconBrandReact,
+    IconBrandRedux,
+    IconBrandSass,
+    IconBrandStorybook,
+    IconBrandSupabase,
+    IconBrandSymfony,
+    IconBrandTailwind,
+    IconBrandTwitter,
+    IconBrandTypescript,
+    IconBrandVercel,
+    IconBrandVite,
+    IconBrandVscode,
+    IconBrandVue,
+    IconBrandYarn,
+    IconBrandYoutube,
+    IconCloud,
+    IconCode,
+    IconCpu,
+    IconDatabase,
+    IconDeviceDesktop,
+    IconDeviceFloppy,
+    IconDeviceMobile,
+    IconEdit,
+    IconExternalLink,
+    IconFileCode,
+    IconHash,
+    IconHexagon,
+    IconLayersIntersect,
+    IconLetterC,
+    IconPackage,
+    IconPalette,
+    IconPlus,
+    IconRefresh,
+    IconSearch,
+    IconServer,
+    IconShieldCheck,
+    IconTerminal2,
+    IconTrash,
+    IconWind,
+    IconWorld,
+    IconX
 } from '@tabler/icons-react';
 import React, { useState } from 'react';
 import { toast } from 'sonner';
@@ -175,7 +175,6 @@ const SkillsManager: React.FC<SkillsManagerProps> = ({ data, onUpdate }) => {
   const [editingSkill, setEditingSkill] = useState<SkillItem | null>(null);
   const [formData, setFormData] = useState<Partial<SkillItem>>({
     name: '',
-    percentage: 80,
     category: 'Frontend',
     icon: 'IconCode'
   });
@@ -184,9 +183,6 @@ const SkillsManager: React.FC<SkillsManagerProps> = ({ data, onUpdate }) => {
   const validate = () => {
     const newErrors: Record<string, string> = {};
     if (!formData.name) newErrors.name = 'Skill name is required';
-    if (formData.percentage === undefined || formData.percentage < 0 || formData.percentage > 100) {
-      newErrors.percentage = 'Percentage must be between 0 and 100';
-    }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -227,7 +223,7 @@ const SkillsManager: React.FC<SkillsManagerProps> = ({ data, onUpdate }) => {
         <button 
           onClick={() => {
             setEditingSkill(null);
-            setFormData({ name: '', percentage: 80, category: 'Frontend', icon: 'IconCode' });
+            setFormData({ name: '', category: 'Frontend', icon: 'IconCode' });
             setErrors({});
             setIsModalOpen(true);
           }}
@@ -248,24 +244,17 @@ const SkillsManager: React.FC<SkillsManagerProps> = ({ data, onUpdate }) => {
                 <IconLayersIntersect size={16} />
                 {cat}
               </h3>
-              <div className="space-y-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                 {catSkills.map(skill => {
                   const IconComponent = iconMap[skill.icon || ''] || IconLayersIntersect;
                   return (
-                    <div key={skill._id} className="group flex items-center gap-4 bg-gray-900/30 p-4 rounded-xl border border-gray-800/50">
-                      <div className="w-10 h-10 rounded-lg bg-gray-800 flex items-center justify-center text-cyan-400" title={skill.icon}>
-                        <IconComponent size={20} />
+                    <div key={skill._id} className="group relative bg-gray-900/30 p-6 rounded-2xl border border-gray-800/50 flex flex-col items-center justify-center gap-4 hover:border-cyan-500/50 transition-all">
+                      <div className="w-12 h-12 rounded-xl bg-gray-800 flex items-center justify-center text-cyan-400 group-hover:scale-110 transition-transform">
+                        <IconComponent size={24} />
                       </div>
-                      <div className="flex-1 space-y-2">
-                        <div className="flex justify-between items-center">
-                          <span className="font-bold text-white">{skill.name}</span>
-                          <span className="text-xs font-bold text-cyan-400">{skill.percentage}%</span>
-                        </div>
-                        <div className="h-1.5 w-full bg-gray-800 rounded-full overflow-hidden">
-                          <div className="h-full bg-cyan-500 transition-all duration-1000" style={{ width: `${skill.percentage}%` }}></div>
-                        </div>
-                      </div>
-                      <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <span className="font-bold text-white text-sm text-center">{skill.name}</span>
+                      
+                      <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                         <button 
                           onClick={() => {
                             setEditingSkill(skill);
@@ -358,23 +347,6 @@ const SkillsManager: React.FC<SkillsManagerProps> = ({ data, onUpdate }) => {
                     );
                   })}
                 </div>
-              </div>
-              <div className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <label className="text-sm font-medium text-gray-400">Proficiency Percentage</label>
-                  <span className="text-cyan-400 font-bold">{formData.percentage}%</span>
-                </div>
-                <input 
-                  type="range" 
-                  min="0" max="100" step="5"
-                  value={formData.percentage}
-                  onChange={(e) => {
-                    setFormData({ ...formData, percentage: parseInt(e.target.value) });
-                    if (errors.percentage) setErrors({ ...errors, percentage: '' });
-                  }}
-                  className={`w-full accent-cyan-500 ${errors.percentage ? 'border-red-500' : ''}`}
-                />
-                {errors.percentage && <p className="text-xs text-red-500 mt-1">{errors.percentage}</p>}
               </div>
             </div>
             <div className="p-6 border-t border-gray-800 bg-gray-900/50 flex justify-end gap-4">

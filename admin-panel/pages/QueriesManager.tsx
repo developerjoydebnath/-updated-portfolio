@@ -1,6 +1,7 @@
-import { CheckCircle, Clock, Mail, Search, Trash2 } from 'lucide-react';
+import { CheckCircle, Clock, Mail, Search, Send, Trash2 } from 'lucide-react';
 import React, { useState } from 'react';
-import { deleteQuery, updateQuery } from '../api';
+import { toast } from 'sonner';
+import { deleteQuery, replyQuery, updateQuery } from '../api';
 import { AppState, ClientQuery } from '../types';
 
 interface QueriesManagerProps {
@@ -11,6 +12,8 @@ interface QueriesManagerProps {
 const QueriesManager: React.FC<QueriesManagerProps> = ({ data, onUpdate }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedQuery, setSelectedQuery] = useState<ClientQuery | null>(null);
+  const [replyMessage, setReplyMessage] = useState('');
+  const [isSending, setIsSending] = useState(false);
 
   const filteredQueries = data.queries.filter(q => 
     q.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
@@ -35,10 +38,32 @@ const QueriesManager: React.FC<QueriesManagerProps> = ({ data, onUpdate }) => {
         await deleteQuery(id);
         onUpdate({ queries: data.queries.filter(q => q._id !== id) });
         if (selectedQuery?._id === id) setSelectedQuery(null);
+        toast.success('Query deleted successfully');
       } catch (error) {
         console.error('Failed to delete query:', error);
-        alert('Failed to delete query');
+        toast.error('Failed to delete query');
       }
+    }
+  };
+
+  const handleReply = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedQuery || !replyMessage.trim()) return;
+
+    setIsSending(true);
+    try {
+      const updatedQuery = await replyQuery(selectedQuery._id, replyMessage);
+      onUpdate({
+        queries: data.queries.map(q => q._id === selectedQuery._id ? updatedQuery : q)
+      });
+      setSelectedQuery(updatedQuery);
+      setReplyMessage('');
+      toast.success('Reply sent successfully');
+    } catch (error) {
+      console.error('Failed to send reply:', error);
+      toast.error('Failed to send reply');
+    } finally {
+      setIsSending(false);
     }
   };
 
@@ -136,13 +161,42 @@ const QueriesManager: React.FC<QueriesManagerProps> = ({ data, onUpdate }) => {
                 </div>
               </div>
               <div className="p-6 border-t border-gray-800 bg-gray-900/30">
-                <a 
-                  href={`mailto:${selectedQuery.email}?subject=Re: ${selectedQuery.subject}`}
-                  className="w-full flex items-center justify-center gap-3 bg-cyan-500 hover:bg-cyan-600 text-white py-3 rounded-xl font-bold transition-all shadow-lg shadow-cyan-500/20"
-                >
-                  <Mail size={18} />
-                  Reply via Email
-                </a>
+                <form onSubmit={handleReply} className="space-y-4">
+                  <div className="relative">
+                    <textarea
+                      placeholder="Write your reply here..."
+                      value={replyMessage}
+                      onChange={(e) => setReplyMessage(e.target.value)}
+                      className="w-full bg-gray-900 border border-gray-800 rounded-xl px-4 py-3 min-h-[120px] focus:border-cyan-500 focus:outline-none transition-all text-sm resize-none"
+                    />
+                  </div>
+                  <div className="flex gap-4">
+                    <button
+                      type="submit"
+                      disabled={isSending || !replyMessage.trim()}
+                      className="flex-1 flex items-center justify-center gap-2 bg-cyan-500 hover:bg-cyan-600 disabled:bg-gray-800 disabled:text-gray-500 text-white py-3 rounded-xl font-bold transition-all shadow-lg shadow-cyan-500/20"
+                    >
+                      {isSending ? (
+                        <>
+                          <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                          Sending...
+                        </>
+                      ) : (
+                        <>
+                          <Send size={18} />
+                          Send Reply
+                        </>
+                      )}
+                    </button>
+                    <a 
+                      href={`mailto:${selectedQuery.email}?subject=Re: ${selectedQuery.subject}`}
+                      className="flex items-center justify-center p-3 bg-gray-800 hover:bg-gray-700 text-gray-400 hover:text-white rounded-xl transition-all"
+                      title="Open in default mail client"
+                    >
+                      <Mail size={18} />
+                    </a>
+                  </div>
+                </form>
               </div>
             </>
           ) : (

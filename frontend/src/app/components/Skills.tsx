@@ -84,7 +84,6 @@ interface SkillsProps {
   data: {
     name: string;
     category: string;
-    percentage: number;
     icon?: string;
   }[];
   proficientIn?: string[];
@@ -175,91 +174,78 @@ export default function Skills({ data, proficientIn }: SkillsProps) {
   const displaySkills = data.length > 0 ? data.map(s => ({
     name: s.name,
     category: s.category.toLowerCase(),
-    level: s.percentage,
     icon: s.icon || 'IconBolt',
     color: s.category === 'Frontend' ? 'from-blue-400 to-cyan-400' : 'from-green-500 to-emerald-600'
   })) : [
     {
       name: 'React',
       category: 'frontend',
-      level: 95,
       icon: 'IconBrandReact',
       color: 'from-blue-400 to-cyan-400',
     },
     {
       name: 'TypeScript',
       category: 'frontend',
-      level: 90,
       icon: 'IconBrandTypescript',
       color: 'from-blue-500 to-blue-600',
     },
     {
       name: 'Next.js',
       category: 'frontend',
-      level: 88,
       icon: 'IconBrandNextjs',
       color: 'from-gray-700 to-gray-900',
     },
     {
       name: 'Tailwind CSS',
       category: 'styling',
-      level: 95,
       icon: 'IconBrandTailwind',
       color: 'from-cyan-400 to-blue-500',
     },
     {
       name: 'CSS/SCSS',
       category: 'styling',
-      level: 92,
       icon: 'IconBrandCss3',
       color: 'from-pink-500 to-purple-500',
     },
     {
       name: 'Node.js',
       category: 'backend',
-      level: 85,
       icon: 'IconBrandNodejs',
       color: 'from-green-500 to-emerald-600',
     },
     {
       name: 'Express',
       category: 'backend',
-      level: 82,
       icon: 'IconServer',
       color: 'from-gray-600 to-gray-800',
     },
     {
       name: 'MongoDB',
       category: 'database',
-      level: 80,
       icon: 'IconBrandMongodb',
       color: 'from-green-500 to-green-700',
     },
     {
       name: 'PostgreSQL',
       category: 'database',
-      level: 78,
       icon: 'IconBrandMysql',
       color: 'from-blue-600 to-indigo-600',
     },
     {
       name: 'Git',
       category: 'tools',
-      level: 92,
       icon: 'IconBrandGithub',
       color: 'from-orange-500 to-red-500',
     },
     {
       name: 'Docker',
       category: 'tools',
-      level: 75,
       icon: 'IconBrandDocker',
       color: 'from-blue-400 to-blue-600',
     },
     {
       name: 'Figma',
       category: 'tools',
-      level: 88,
       icon: 'IconBrandFigma',
       color: 'from-purple-500 to-pink-500',
     },
@@ -336,83 +322,36 @@ export default function Skills({ data, proficientIn }: SkillsProps) {
         </motion.div>
 
         {/* Skills Grid */}
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6">
           {filteredSkills.map((skill: any, index: number) => (
             <motion.div
               key={skill.name}
-              initial={{ opacity: 0, scale: 0.8 }}
-              whileInView={{ opacity: 1, scale: 1 }}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: index * 0.05 }}
+              transition={{ delay: index * 0.1 }}
               layout
             >
-              <GradientBorderCard className="h-full">
-                <div className="p-6">
-                  {/* Icon and Name */}
-                  <div className="flex items-center gap-3 mb-4">
-                    <motion.div
-                      initial={{ scale: 0, rotate: -180 }}
-                      whileInView={{ scale: 1, rotate: 0 }}
-                      viewport={{ once: true }}
-                      transition={{ delay: 0.1 + index * 0.05, type: 'spring', stiffness: 200 }}
-                      className="text-cyan-400"
-                    >
-                      {(() => {
-                        const IconComponent = iconMap[skill.icon] || IconBolt;
-                        return <IconComponent size={32} />;
-                      })()}
-                    </motion.div>
-                    <h3 className="font-bold text-lg">{skill.name}</h3>
-                  </div>
-
-                  {/* Circular Progress */}
-                  <div className="relative w-32 h-32 mx-auto">
-                    {/* Background circle */}
-                    <svg className="w-full h-full transform -rotate-90" viewBox="0 0 128 128">
-                      <circle
-                        cx="64"
-                        cy="64"
-                        r="56"
-                        stroke="currentColor"
-                        strokeWidth="8"
-                        fill="none"
-                        className="text-slate-800"
-                      />
-                      {/* Progress circle */}
-                      <motion.circle
-                        cx="64"
-                        cy="64"
-                        r="56"
-                        stroke="url(#gradient)"
-                        strokeWidth="8"
-                        fill="none"
-                        strokeLinecap="round"
-                        initial={{ strokeDasharray: '0 352' }}
-                        whileInView={{ strokeDasharray: `${(skill.level / 100) * 352} 352` }}
-                        viewport={{ once: true }}
-                        transition={{ delay: 0.2 + index * 0.05, duration: 1, ease: 'easeOut' }}
-                      />
-                      <defs>
-                        <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                          <stop offset="0%" stopColor="#10b981" />
-                          <stop offset="100%" stopColor="#06b6d4" />
-                        </linearGradient>
-                      </defs>
-                    </svg>
-
-                    {/* Percentage Text */}
-                    <motion.div
-                      initial={{ opacity: 0, scale: 0 }}
-                      whileInView={{ opacity: 1, scale: 1 }}
-                      viewport={{ once: true }}
-                      transition={{ delay: 0.3 + index * 0.05 }}
-                      className="absolute inset-0 flex items-center justify-center"
-                    >
-                      <span className={`text-xl sm:text-2xl font-bold bg-gradient-to-r ${skill.color} bg-clip-text text-transparent`}>
-                        {skill.level}%
-                      </span>
-                    </motion.div>
-                  </div>
+              <GradientBorderCard className="h-full group">
+                <div className="p-8 flex flex-col items-center justify-center text-center gap-4">
+                  {/* Icon */}
+                  <motion.div
+                    initial={{ scale: 0.7 }}
+                    whileInView={{ scale: 1 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: 0.1 + index * 0.1 }}
+                    className="text-cyan-400 [&_svg]:size-12 sm:[&_svg]:size-16 group-hover:scale-110 transition-transform duration-300"
+                  >
+                    {(() => {
+                      const IconComponent = iconMap[skill.icon] || IconBolt;
+                      return <IconComponent />;
+                    })()}
+                  </motion.div>
+                  
+                  {/* Name */}
+                  <h3 className="font-bold text-base sm:text-lg text-white group-hover:text-cyan-400 transition-colors">
+                    {skill.name}
+                  </h3>
                 </div>
               </GradientBorderCard>
             </motion.div>

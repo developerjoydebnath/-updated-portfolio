@@ -78,6 +78,9 @@ export default function Contact({ socialLinks, contact }: ContactProps) {
       setSubmitStatus('error');
     } finally {
       setIsSubmitting(false);
+      setTimeout(() => {
+        setSubmitStatus('idle');
+      }, 5000);
     }
   };
 

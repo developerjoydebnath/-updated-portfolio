@@ -1,15 +1,16 @@
 import { Menu, X } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { HashRouter, Navigate, Route, Routes } from 'react-router-dom';
-import { Toaster } from 'sonner';
+import { io } from 'socket.io-client';
+import { toast, Toaster } from 'sonner';
 import {
-    getContent,
-    getExperience,
-    getProjects,
-    getQueries,
-    getServices,
-    getSkills,
-    getTestimonials
+  getContent,
+  getExperience,
+  getProjects,
+  getQueries,
+  getServices,
+  getSkills,
+  getTestimonials
 } from './api';
 import Loader from './components/Loader';
 import Sidebar from './components/Sidebar';
@@ -92,6 +93,78 @@ const App: React.FC = () => {
     };
     
     fetchData();
+  }, [isAuthenticated]);
+
+  useEffect(() => {
+    if (!isAuthenticated) return;
+
+    // Unlock audio context on first user interaction
+    const unlockAudio = () => {
+      const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
+      audio.volume = 0; // Silent play
+      audio.play()
+        .then(() => {
+          window.removeEventListener('click', unlockAudio);
+          window.removeEventListener('keydown', unlockAudio);
+          console.log('Audio unlocked');
+        })
+        .catch(() => {});
+    };
+
+    window.addEventListener('click', unlockAudio);
+    window.addEventListener('keydown', unlockAudio);
+
+    // Request notification permission
+    if ("Notification" in window && Notification.permission === "default") {
+      Notification.requestPermission();
+    }
+
+    const socket = io(import.meta.env.VITE_API_URL || 'http://localhost:5000', {
+      withCredentials: true,
+    });
+
+    socket.on('connect', () => {
+      console.log('Connected to socket server');
+    });
+
+    socket.on('new_query', (query) => {
+      setData(prev => ({
+        ...prev,
+        queries: [query, ...prev.queries]
+      }));
+
+      // Play notification sound
+      const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
+      audio.play().catch(e => console.log('Audio play failed:', e));
+
+      // Browser Notification
+      if ("Notification" in window && Notification.permission === "granted") {
+        new Notification("New Query Received", {
+          body: `From: ${query.name}\nSubject: ${query.subject}`,
+          icon: "/favicon.ico", // Change this to your logo path
+          tag: "new-query",
+          requireInteraction: true,
+          silent: false
+        });
+      }
+
+      toast.success('New client query received!', {
+        description: `From: ${query.name} - ${query.subject}`,
+        action: {
+          label: 'View',
+          onClick: () => {
+             // Maybe navigate to queries page? 
+             // For now just closing is fine or user can click it
+          },
+        },
+      });
+    });
+
+    return () => {
+      window.removeEventListener('click', unlockAudio);
+      window.removeEventListener('keydown', unlockAudio);
+      socket.disconnect();
+    };
   }, [isAuthenticated]);
 
   const updateData = (newData: Partial<AppState>) => {

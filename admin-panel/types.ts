@@ -38,7 +38,6 @@ export interface ServiceItem {
 export interface SkillItem {
   _id: string;
   name: string;
-  percentage: number;
   category: 'Frontend' | 'Backend' | 'Database' | 'Tools' | 'Styling';
   icon?: string;
 }
