@@ -120,8 +120,8 @@ const App: React.FC = () => {
     }
 
     // Pusher Initialization
-    const pusherKey = import.meta.env.VITE_PUSHER_KEY;
-    const pusherCluster = import.meta.env.VITE_PUSHER_CLUSTER;
+    const pusherKey = import.meta.env.VITE_PUSHER_KEY?.trim();
+    const pusherCluster = import.meta.env.VITE_PUSHER_CLUSTER?.trim();
 
     if (!pusherKey || !pusherCluster) {
       console.warn('Pusher keys are missing. Real-time updates disabled.');
@@ -130,7 +130,9 @@ const App: React.FC = () => {
 
     const pusher = new Pusher(pusherKey, {
       cluster: pusherCluster,
-      forceTLS: true
+      forceTLS: true,
+      enabledTransports: ['ws', 'wss'],
+      activityTimeout: 60000, // Longer timeout for stability
     });
 
     pusher.connection.bind('state_change', (states: any) => {
@@ -138,41 +140,49 @@ const App: React.FC = () => {
     });
 
     pusher.connection.bind('error', (err: any) => {
-      console.error('Pusher connection error:', err);
+      if (err.data && err.data.code === 1006) {
+        // Just log it quietly as it's a common abnormal closure handled by Pusher
+        console.log('Pusher: Connection reset (1006). Reconnecting...');
+      } else {
+        console.error('Pusher connection error:', err);
+      }
     });
 
     const channel = pusher.subscribe('portfolio-queries');
     
     channel.bind('new-query', (query: any) => {
-      setData(prev => ({
-        ...prev,
-        queries: [query, ...prev.queries]
-      }));
-
-      // Play notification sound
-      const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
-      audio.play().catch(e => console.log('Audio play failed:', e));
-
-      // Browser Notification
-      if ("Notification" in window && Notification.permission === "granted") {
-        new Notification("New Query Received", {
-          body: `From: ${query.name}\nSubject: ${query.subject}`,
-          icon: "/favicon.ico",
-          tag: "new-query",
-          requireInteraction: true,
-          silent: false
+      // Small delay to prevent blocking the WebSocket event loop
+      setTimeout(() => {
+        React.startTransition(() => {
+          setData(prev => ({
+            ...prev,
+            queries: [query, ...prev.queries]
+          }));
         });
-      }
 
-      toast.success('New client query received!', {
-        description: `From: ${query.name} - ${query.subject}`,
-        action: {
-          label: 'View',
-          onClick: () => {
-             // Navigation logic if needed
-          },
-        },
-      });
+        // Play notification sound
+        const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
+        audio.play().catch(e => console.log('Audio play failed:', e));
+
+        // Browser Notification
+        try {
+          if ("Notification" in window && Notification.permission === "granted") {
+            new Notification("New Query Received", {
+              body: `From: ${query.name}\nSubject: ${query.subject}`,
+              icon: "/favicon.ico",
+              tag: "new-query",
+              requireInteraction: true,
+              silent: false
+            });
+          }
+        } catch (nErr) {
+          console.error('Notification creation error:', nErr);
+        }
+
+        toast.success('New client query received!', {
+          description: `From: ${query.name} - ${query.subject}`,
+        });
+      }, 0);
     });
 
     return () => {
