@@ -1,5 +1,6 @@
 import express from 'express';
 import { Query } from '../models/Query';
+import { sendContactEmail, sendReplyEmail } from '../utils/mailer';
 
 const router = express.Router();
 
@@ -54,8 +55,20 @@ router.post('/', async (req, res) => {
   try {
     const query = new Query(req.body);
     await query.save();
+
+    // Emit live notification
+    const io = req.app.get('io');
+    if (io) {
+      io.emit('new_query', query);
+    }
+
+    // Send email notification
+    const { name, email, subject, message } = req.body;
+    await sendContactEmail(name, email, subject, message);
+
     res.status(201).json(query);
   } catch (error) {
+    console.error('Error in POST /api/queries:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -122,6 +135,57 @@ router.delete('/:id', async (req, res) => {
     if (!query) return res.status(404).json({ error: 'Not found' });
     res.json({ message: 'Deleted' });
   } catch (error) {
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+/**
+ * @swagger
+ * /api/queries/{id}/reply:
+ *   post:
+ *     summary: Send a reply email to a query
+ *     tags: [Queries]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [message]
+ *             properties:
+ *               message:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Reply sent and query updated
+ *       404:
+ *         description: Not found
+ *       500:
+ *         description: Internal server error
+ */
+router.post('/:id/reply', async (req, res) => {
+  try {
+    const { message } = req.body;
+    const query = await Query.findById(req.params.id);
+    
+    if (!query) return res.status(404).json({ error: 'Query not found' });
+
+    // Send reply email
+    await sendReplyEmail(query.email, query.subject, message);
+
+    // Update status to replied
+    query.status = 'replied';
+    await query.save();
+
+    res.json(query);
+  } catch (error) {
+    console.error('Error sending reply:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
