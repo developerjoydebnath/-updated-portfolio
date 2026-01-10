@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
 import {
-  getContent,
-  getExperience,
-  getProjects,
-  getServices,
-  getSkills,
-  getTestimonials,
-  recordVisit
+    getContent,
+    getExperience,
+    getProjects,
+    getServices,
+    getSkills,
+    getTestimonials,
+    recordVisit
 } from '../api';
 import About from './components/About';
 import Contact from './components/Contact';
@@ -16,6 +16,7 @@ import Navigation from './components/Navigation';
 import Projects from './components/Projects';
 import Services from './components/Services';
 import Skills from './components/Skills';
+import SmoothScroll from './components/SmoothScroll';
 import Testimonials from './components/Testimonials';
 
 export default function App() {
@@ -127,6 +128,7 @@ export default function App() {
       {/* Navigation */}
       <Navigation activeSection={activeSection} />
 
+      <SmoothScroll>
       {/* Content */}
       <main className="relative">
         <section id="home">
@@ -162,6 +164,7 @@ export default function App() {
           <p>Designed with <span className="text-red-500">❤️</span> by JOY</p>
         </div>
       </footer>
+      </SmoothScroll>
     </div>
   );
 }

@@ -1,9 +1,9 @@
 import {
-  IconBrandFacebook,
-  IconBrandGithub,
-  IconBrandLinkedin,
-  IconBrandTwitter,
-  IconChevronDown
+    IconBrandFacebook,
+    IconBrandGithub,
+    IconBrandLinkedin,
+    IconBrandTwitter,
+    IconChevronDown
 } from '@tabler/icons-react';
 import { motion } from 'motion/react';
 import GradientButton from './GradientButton';
@@ -34,7 +34,7 @@ export default function Hero({ data, socialLinks }: HeroProps) {
   ];
 
   const scrollToAbout = () => {
-    document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' });
+    document.getElementById('about')?.scrollIntoView({ behavior: 'auto' });
   };
 
   return (
@@ -102,13 +102,13 @@ export default function Hero({ data, socialLinks }: HeroProps) {
             className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4 mb-8 sm:mb-16"
           >
             <GradientButton
-              onClick={() => document.getElementById('projects')?.scrollIntoView({ behavior: 'smooth' })}
+              onClick={() => document.getElementById('projects')?.scrollIntoView({ behavior: 'auto' })}
               className="w-auto sm:px-8 px-6 sm:py-4 text-sm sm:text-base py-3 rounded-full cursor-pointer"
             >
               View My Work
             </GradientButton>
             <GradientButton
-              onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}
+              onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'auto' })}
               variant="secondary"
               className="w-auto sm:px-8 px-6 sm:py-4 text-sm sm:text-base py-3 rounded-full cursor-pointer"
             >

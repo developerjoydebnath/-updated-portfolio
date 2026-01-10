@@ -22,7 +22,7 @@ export default function Navigation({ activeSection }: NavigationProps) {
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId);
     if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
+      element.scrollIntoView({ behavior: 'auto' });
     }
     setIsMobileMenuOpen(false);
   };
